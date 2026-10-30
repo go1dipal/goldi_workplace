@@ -1,1 +1,689 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fbfbf8">
+<title>Ruitjespapier</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23fbfbf8'/><path d='M0 4h16M0 8h16M0 12h16M4 0v16M8 0v16M12 0v16' stroke='%2393b4dd' stroke-width='.6'/><rect x='4' y='4' width='8' height='4' fill='%233b82f6'/></svg>">
+<style>
+:root{--ui:rgba(255,255,255,.95);--ink:#1f2937;--muted:#6b7280;--line:#e5e7eb;--acc:#2563eb;--accbg:#dbeafe;--shadow:0 6px 24px rgba(15,23,42,.12)}
+@media (prefers-color-scheme:dark){:root{--ui:rgba(30,33,40,.95);--ink:#e5e7eb;--muted:#9ca3af;--line:#3a404b;--acc:#7cb1ff;--accbg:#22385a}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#fbfbf8;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#c{position:fixed;inset:0;touch-action:none;display:block}
+#ta{position:fixed;left:0;top:0;width:2px;height:20px;opacity:0;border:0;padding:0;margin:0;resize:none;font-size:16px;white-space:pre;overflow:hidden;pointer-events:none;color:transparent;background:transparent;caret-color:transparent;z-index:1}
+.bar{position:fixed;z-index:5;display:flex;align-items:center;gap:2px;padding:5px;background:var(--ui);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow-x:auto;scrollbar-width:none;touch-action:pan-x}
+.bar::-webkit-scrollbar{display:none}
+#tools{top:12px;left:50%;transform:translateX(-50%);max-width:calc(100% - 80px)}
+#bottom{bottom:12px;left:50%;transform:translateX(-50%);max-width:calc(100% - 24px)}
+#menuBar{top:12px;right:12px}
+#zoom{right:12px;bottom:78px;flex-direction:column;overflow:visible}
+.btn{flex:none;width:38px;height:38px;border:0;border-radius:10px;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0;font:inherit}
+.btn:hover{background:rgba(127,127,127,.13)}
+.btn.on{background:var(--accbg);color:var(--acc)}
+.btn:disabled{opacity:.3;cursor:default;background:transparent}
+.sep{flex:none;width:1px;height:24px;background:var(--line);margin:0 4px}
+#zoom .sep{width:24px;height:1px;margin:3px 0}
+.sw{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid rgba(0,0,0,.14);margin:0 3px;cursor:pointer;padding:0;position:relative}
+.sw.on{box-shadow:0 0 0 2px var(--ui),0 0 0 4px var(--acc)}
+#custom{background:conic-gradient(#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);overflow:hidden}
+#custom input{position:absolute;inset:-10px;width:46px;height:46px;opacity:0;cursor:pointer;border:0;padding:0}
+.dot{display:block;background:currentColor}
+#zlabel{font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted);width:38px;text-align:center;padding:2px 0;cursor:pointer}
+#menu{position:fixed;top:62px;right:12px;z-index:6;min-width:220px;padding:6px;background:var(--ui);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);display:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#menu.open{display:block}
+#menu button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:transparent;color:var(--ink);padding:9px 10px;border-radius:8px;font:inherit;cursor:pointer}
+#menu button:hover{background:rgba(127,127,127,.13)}
+#menu .danger{color:#dc2626}
+#menu hr{border:0;border-top:1px solid var(--line);margin:5px 4px}
+#toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(10px);z-index:9;background:#111827;color:#fff;padding:9px 14px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;max-width:calc(100% - 32px);text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+#help{position:fixed;inset:0;z-index:10;background:rgba(15,23,42,.35);display:none;align-items:center;justify-content:center;padding:16px}
+#help.open{display:flex}
+#help .card{background:var(--ui);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);max-width:520px;width:100%;max-height:85vh;overflow:auto;padding:20px 22px;user-select:text;-webkit-user-select:text}
+#help h2{margin:0 0 10px;font-size:18px}
+#help ul{margin:0;padding-left:18px}
+#help li{margin:6px 0}
+#help kbd{font:12px ui-monospace,monospace;background:rgba(127,127,127,.15);border-radius:4px;padding:1px 5px}
+#help .close{margin-top:14px;border:0;background:var(--acc);color:#fff;border-radius:9px;padding:8px 16px;font:inherit;cursor:pointer}
+@media (max-width:640px){#tools{left:12px;transform:none;max-width:calc(100% - 74px)}.btn{width:36px;height:36px}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<textarea id="ta" wrap="off" autocapitalize="sentences" autocomplete="off" spellcheck="false" aria-label="Tekst in vakje"></textarea>
+
+<div class="bar" id="tools"></div>
+<div class="bar" id="menuBar"><button class="btn" id="menuBtn" title="Menu" aria-label="Menu"></button></div>
+<div id="menu">
+  <button data-act="png">Exporteren als PNG</button>
+  <button data-act="save">Opslaan als bestand (.json)</button>
+  <button data-act="open">Bestand openen (.json)</button>
+  <hr>
+  <button data-act="help">Uitleg &amp; sneltoetsen</button>
+  <button data-act="clear" class="danger">Alles wissen</button>
+</div>
+<div class="bar" id="zoom">
+  <button class="btn" id="zin" title="Inzoomen (+)">+</button>
+  <div id="zlabel" title="Terug naar 100%">100%</div>
+  <button class="btn" id="zout" title="Uitzoomen (−)">−</button>
+  <span class="sep"></span>
+  <button class="btn" id="home" title="Naar het begin"></button>
+</div>
+<div class="bar" id="bottom"></div>
+<div id="toast"></div>
+<input type="file" id="file" accept=".json,application/json" hidden>
+
+<div id="help"><div class="card">
+  <h2>Ruitjespapier</h2>
+  <ul>
+    <li><b>Kleuren:</b> kies onderin een kleur en teken met het potlood <kbd>B</kbd>. Kies een penseel (vierkant, rond, spray) en een dikte (<kbd>[</kbd> <kbd>]</kbd>).</li>
+    <li><b>Lijn</b> <kbd>L</kbd>, <b>rechthoek</b> <kbd>R</kbd>, <b>gevulde rechthoek</b> <kbd>Shift</kbd>+<kbd>R</kbd>, <b>emmer</b> <kbd>F</kbd> (vult een afgesloten gebied), <b>gum</b> <kbd>E</kbd>, <b>pipet</b> <kbd>I</kbd>.</li>
+    <li><b>Tekst</b> <kbd>T</kbd>: tik in een vakje en typ. Aaneengesloten vakjes van dezelfde kleur vormen samen één tekstvak: je typt gewoon door naar het volgende vakje en de volgende rij. In een leeg vakje loopt de tekst door naar rechts. <kbd>Esc</kbd> om te stoppen.</li>
+    <li><b>Verschuiven:</b> hand <kbd>H</kbd>, <kbd>spatie</kbd>+slepen, rechter- of middelste muisknop, scrollen, of slepen met twee vingers.</li>
+    <li><b>Zoomen:</b> <kbd>Ctrl</kbd>+scrollen, knijpen met twee vingers, of <kbd>+</kbd> / <kbd>−</kbd>.</li>
+    <li><b>Ongedaan maken</b> <kbd>Ctrl</kbd>+<kbd>Z</kbd>, <b>opnieuw</b> <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd>. Kleuren kiezen met <kbd>1</kbd>–<kbd>9</kbd>.</li>
+    <li>Alles wordt automatisch in deze browser bewaard. Gebruik het menu om een bestand op te slaan of een PNG te maken.</li>
+  </ul>
+  <button class="close">Begrepen</button>
+</div></div>
+
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+const cv=$('#c'),ctx=cv.getContext('2d'),ta=$('#ta');
+const FONT='system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
+const FR=.56,PAD=.16,MAXR=5000,MAXFILL=40000,RUNMAX=60,LS='ruitjespapier-v1',BASE=28;
+const PAPER='#fbfbf8',INK='#1f2937',ACC='#2563eb';
+const N4=[[1,0],[-1,0],[0,1],[0,-1]];
+const PALETTE=['#1f2937','#ef4444','#f97316','#facc15','#22c55e','#14b8a6','#3b82f6','#6366f1','#a855f7','#ec4899','#a16207','#9ca3af','#fecaca','#fde68a','#bbf7d0','#bfdbfe','#e9d5ff'];
+
+let W=0,H=0,dpr=1;
+const cells=new Map();   // "x,y" -> kleur
+const texts=new Map();   // "x,y" (anker) -> tekst
+const view={x:0,y:0,s:BASE};
+let tool='pen',prevTool='pen',color='#3b82f6',size=1,shape='square';
+let version=0;
+const key=(x,y)=>x+','+y;
+const pk=k=>{const i=k.indexOf(',');return[+k.slice(0,i),+k.slice(i+1)]};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+/* ---------- tekstmeting ---------- */
+const mctx=document.createElement('canvas').getContext('2d');mctx.font='100px '+FONT;
+const cwCache=new Map();
+function cw(ch){let w=cwCache.get(ch);if(w===undefined){w=mctx.measureText(ch===' '?'\u00a0':ch).width/100*FR;cwCache.set(ch,w)}return w}
+function gl(t,i){const c=t.charCodeAt(i);return(c>=0xD800&&c<0xDC00)?t.slice(i,i+2):t[i]}
+
+/* ---------- gebieden (samengevoegde vakjes) ---------- */
+let rcache=new Map(),rver=-1;
+function regionOf(x,y){
+  if(rver!==version){rcache.clear();rver=version}
+  const k=key(x,y);let r=rcache.get(k);if(r)return r;
+  const col=cells.get(k);
+  if(col){
+    const set=new Set([k]),list=[[x,y]];
+    for(let i=0;i<list.length&&list.length<MAXR;i++){
+      const[a,b]=list[i];
+      for(const[dx,dy]of N4){const nx=a+dx,ny=b+dy,nk=key(nx,ny);
+        if(!set.has(nk)&&cells.get(nk)===col){set.add(nk);list.push([nx,ny])}}
+    }
+    r=buildRegion(list,set,col);
+    for(const c of set)rcache.set(c,r);
+  }else{
+    let len=1;
+    while(len<RUNMAX){const nk=key(x+len,y);if(cells.has(nk)||texts.has(nk))break;len++}
+    const list=[],set=new Set();
+    for(let i=0;i<len;i++){list.push([x+i,y]);set.add(key(x+i,y))}
+    r={list,set,color:null,colored:false,runs:[{x,y,len}],anchor:{x,y},bbox:{x0:x,y0:y,x1:x+len,y1:y+1}};
+    rcache.set(k,r);
+  }
+  return r;
+}
+function buildRegion(list,set,col){
+  const rows=new Map();let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  for(const[x,y]of list){(rows.get(y)||rows.set(y,[]).get(y)).push(x);
+    if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+  const ys=[...rows.keys()].sort((a,b)=>a-b),runs=[];
+  for(const y of ys){
+    const xs=rows.get(y).sort((a,b)=>a-b);let s=xs[0],p=xs[0];
+    for(let i=1;i<=xs.length;i++){
+      if(i<xs.length&&xs[i]===p+1){p=xs[i];continue}
+      runs.push({x:s,y,len:p-s+1});if(i<xs.length){s=p=xs[i]}
+    }
+  }
+  return{list,set,color:col,colored:true,runs,anchor:{x:runs[0].x,y:runs[0].y},bbox:{x0,y0,x1:x1+1,y1:y1+1}};
+}
+
+/* ---------- tekst opmaken over de rijen van een gebied ---------- */
+function layout(t,runs){
+  const lines=[],n=t.length;let i=0,r=0;
+  while(r<runs.length){
+    if(i>n)break;
+    if(i===n&&lines.length){const last=lines[lines.length-1];if(t[n-1]!=='\n'||last.start===n)break}
+    const run=runs[r],avail=run.len-2*PAD;
+    let w=0,j=i,lastSp=-1;
+    while(j<n&&t[j]!=='\n'){const g=gl(t,j),c=cw(g);if(w+c>avail&&j>i)break;w+=c;if(g===' ')lastSp=j;j+=g.length}
+    let end=j,next=j;
+    if(j<n&&t[j]==='\n')next=j+1;
+    else if(j<n&&lastSp>i){end=lastSp;next=lastSp+1}
+    lines.push({run,start:i,end});
+    i=next;r++;
+  }
+  return{lines,overflow:i<n};
+}
+const lcache=new Map();
+function getLayout(k,t,r){const c=lcache.get(k);if(c&&c.t===t&&c.r===r)return c.L;
+  if(lcache.size>texts.size*2+50)lcache.clear();
+  const L=layout(t,r.runs);lcache.set(k,{t,r,L});return L}
+function widthOf(t,a,b){let w=0;for(let i=a;i<b;){const g=gl(t,i);w+=cw(g);i+=g.length}return w}
+function caretPos(t,L,k){
+  if(!L.lines.length)return null;let li=0;
+  for(let i=0;i<L.lines.length;i++){if(L.lines[i].start<=k)li=i;else break}
+  const ln=L.lines[li];
+  return{x:ln.run.x+PAD+widthOf(t,ln.start,Math.min(k,ln.end)),y:ln.run.y,li};
+}
+function indexInLine(t,ln,wx){
+  let x=ln.run.x+PAD;
+  for(let i=ln.start;i<ln.end;){const g=gl(t,i),c=cw(g);if(wx<x+c/2)return i;x+=c;i+=g.length}
+  return ln.end;
+}
+function hitIndex(t,L,wx,wy){
+  const cy=Math.floor(wy);
+  for(const ln of L.lines)if(ln.run.y===cy&&wx>=ln.run.x&&wx<ln.run.x+ln.run.len)return indexInLine(t,ln,wx);
+  return t.length;
+}
+
+/* ---------- wijzigingen + ongedaan maken ---------- */
+let tx=null;const undoStack=[],redoStack=[];
+function begin(){tx={cells:new Map(),texts:new Map(),displaced:new Map()}}
+function setCell(k,val){
+  const old=cells.get(k)??null;if(old===val)return;
+  if(tx){
+    if(!tx.cells.has(k))tx.cells.set(k,old);
+    if(old&&texts.has(k)&&!tx.displaced.has(k)){const[x,y]=pk(k);tx.displaced.set(k,{color:old,list:regionOf(x,y).list.slice()})}
+  }
+  if(val)cells.set(k,val);else cells.delete(k);
+  version++;
+}
+function setText(k,val){
+  const old=texts.get(k)??null;if(old===val)return;
+  if(tx&&!tx.texts.has(k))tx.texts.set(k,old);
+  if(val===null)texts.delete(k);else texts.set(k,val);
+  version++;
+}
+function commit(){
+  if(!tx)return;
+  for(const[k,d]of tx.displaced){
+    if(!texts.has(k)||cells.get(k)===d.color)continue;
+    const rem=d.list.filter(([x,y])=>cells.get(key(x,y))===d.color).sort((a,b)=>a[1]-b[1]||a[0]-b[0]);
+    const t=texts.get(k);
+    if(rem.length){const nk=key(rem[0][0],rem[0][1]);setText(k,null);const ex=texts.get(nk);setText(nk,ex?ex+' '+t:t)}
+    else if(!cells.has(k))setText(k,null);
+  }
+  normalize();
+  if(tx.cells.size||tx.texts.size){undoStack.push({cells:tx.cells,texts:tx.texts});if(undoStack.length>300)undoStack.shift();redoStack.length=0;save()}
+  tx=null;updUndo();
+}
+function rollback(){if(!tx)return;applyTx(tx);tx=null}
+function normalize(){
+  const groups=new Map();
+  const ents=[...texts.keys()].map(k=>{const[x,y]=pk(k);return{k,x,y}}).sort((a,b)=>a.y-b.y||a.x-b.x);
+  for(const e of ents){
+    const t=texts.get(e.k);
+    if(!t.trim()&&!(edit&&edit.k===e.k)){setText(e.k,null);continue}
+    if(!cells.has(e.k))continue;
+    const r=regionOf(e.x,e.y),ck=key(r.anchor.x,r.anchor.y);
+    if(!groups.has(ck))groups.set(ck,[]);groups.get(ck).push(e.k);
+  }
+  for(const[ck,ks]of groups){
+    if(ks.length===1&&ks[0]===ck)continue;
+    const parts=ks.map(k=>texts.get(k)).filter(Boolean);
+    for(const k of ks)setText(k,null);
+    setText(ck,parts.join(' '));
+  }
+}
+function applyTx(t){
+  const inv={cells:new Map(),texts:new Map()};
+  for(const[k,v]of t.cells){inv.cells.set(k,cells.get(k)??null);if(v)cells.set(k,v);else cells.delete(k)}
+  for(const[k,v]of t.texts){inv.texts.set(k,texts.get(k)??null);if(v===null)texts.delete(k);else texts.set(k,v)}
+  version++;return inv;
+}
+function undo(){endEdit();const t=undoStack.pop();if(!t)return;redoStack.push(applyTx(t));after()}
+function redo(){endEdit();const t=redoStack.pop();if(!t)return;undoStack.push(applyTx(t));after()}
+function after(){updUndo();save();requestDraw()}
+function updUndo(){$('#undo').disabled=!undoStack.length;$('#redo').disabled=!redoStack.length}
+
+/* ---------- penselen ---------- */
+function footprint(cx,cy,shp,n){
+  const out=[],lo=-Math.floor((n-1)/2),c=(n-1)/2,r=n/2-.25;
+  for(let dy=0;dy<n;dy++)for(let dx=0;dx<n;dx++){
+    if(shp!=='square'&&n>2){const ex=dx-c,ey=dy-c;if(ex*ex+ey*ey>r*r)continue}
+    out.push([cx+lo+dx,cy+lo+dy]);
+  }
+  return out;
+}
+const sprayN=()=>Math.min(15,Math.max(5,size*2+1));
+function brushCells(cx,cy,erase){
+  if(shape==='spray'&&!erase)return footprint(cx,cy,'round',sprayN()).filter(()=>Math.random()<.2);
+  return footprint(cx,cy,shape==='spray'?'round':shape,size);
+}
+function stamp(cx,cy,erase){
+  for(const[x,y]of brushCells(cx,cy,erase)){
+    const k=key(x,y);
+    if(erase){if(!cells.has(k)&&texts.has(k))setText(k,null);setCell(k,null)}
+    else setCell(k,color);
+  }
+}
+function lineCells(x0,y0,x1,y1){
+  const out=[];let dx=Math.abs(x1-x0),sx=x0<x1?1:-1,dy=-Math.abs(y1-y0),sy=y0<y1?1:-1,err=dx+dy;
+  for(;;){out.push([x0,y0]);if(x0===x1&&y0===y1)break;const e2=2*err;if(e2>=dy){err+=dy;x0+=sx}if(e2<=dx){err+=dx;y0+=sy}}
+  return out;
+}
+function shapeCells(a,b){
+  const set=new Set(),shp=shape==='spray'?'round':shape;
+  const add=(x,y,fp)=>{if(fp)for(const[px,py]of footprint(x,y,shp,size))set.add(key(px,py));else set.add(key(x,y))};
+  if(tool==='line'){for(const[x,y]of lineCells(a[0],a[1],b[0],b[1]))add(x,y,true)}
+  else{
+    const x0=Math.min(a[0],b[0]),x1=Math.max(a[0],b[0]),y0=Math.min(a[1],b[1]),y1=Math.max(a[1],b[1]);
+    if(tool==='rectFill'){
+      if((x1-x0+1)*(y1-y0+1)>250000)return set;
+      for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)set.add(key(x,y));
+    }else{
+      for(let x=x0;x<=x1;x++){add(x,y0,true);add(x,y1,true)}
+      for(let y=y0;y<=y1;y++){add(x0,y,true);add(x1,y,true)}
+    }
+  }
+  return set;
+}
+function flood(cx,cy){
+  const k0=key(cx,cy),target=cells.get(k0)??null;if(target===color)return;
+  const seen=new Set([k0]),q=[[cx,cy]];
+  for(let i=0;i<q.length;i++){
+    if(q.length>MAXFILL){toast('Dit gebied is niet afgesloten, dus het kan niet gevuld worden.');return}
+    const[x,y]=q[i];
+    for(const[dx,dy]of N4){const nx=x+dx,ny=y+dy,nk=key(nx,ny);
+      if(!seen.has(nk)&&(cells.get(nk)??null)===target){seen.add(nk);q.push([nx,ny])}}
+  }
+  begin();for(const[x,y]of q)setCell(key(x,y),color);commit();
+}
+
+/* ---------- tekst bewerken ---------- */
+let edit=null,caretOn=true;
+function findAnchor(cx,cy){
+  const k=key(cx,cy);
+  if(cells.has(k)){const r=regionOf(cx,cy);return key(r.anchor.x,r.anchor.y)}
+  if(texts.has(k))return k;
+  for(let d=1;d<RUNMAX;d++){
+    const nk=key(cx-d,cy);if(cells.has(nk))break;
+    if(texts.has(nk)){if(regionOf(cx-d,cy).runs[0].len>d)return nk;break}
+  }
+  return k;
+}
+function editInfo(){const t=texts.get(edit.k)??'';const[x,y]=pk(edit.k);const r=regionOf(x,y);return{t,r,L:getLayout(edit.k,t,r)}}
+function startEdit(cx,cy,w){
+  endEdit();
+  const k=findAnchor(cx,cy),before=texts.get(k)??null;
+  if(before===null){texts.set(k,'');version++}
+  edit={k,before};
+  ta.value=texts.get(k);
+  const{t,L}=editInfo(),idx=hitIndex(t,L,w.x,w.y);
+  ta.focus({preventScroll:true});ta.setSelectionRange(idx,idx);caretOn=true;
+}
+function endEdit(){
+  if(!edit)return;
+  const{k,before}=edit;edit=null;
+  let t=texts.get(k)??null;
+  if(t!==null&&!t.trim()){texts.delete(k);t=null}
+  if(t!==before){undoStack.push({cells:new Map(),texts:new Map([[k,before]])});redoStack.length=0}
+  version++;
+  if(document.activeElement===ta)ta.blur();
+  save();updUndo();requestDraw();
+}
+function moveVert(dir,shift){
+  const{t,L}=editInfo();
+  const back=ta.selectionDirection==='backward';
+  const focus=back?ta.selectionStart:ta.selectionEnd,anchor=back?ta.selectionEnd:ta.selectionStart;
+  const c=caretPos(t,L,focus);if(!c)return;
+  const li=c.li+dir;let idx;
+  if(li<0)idx=0;else if(li>=L.lines.length)idx=t.length;else idx=indexInLine(t,L.lines[li],c.x);
+  if(shift)ta.setSelectionRange(Math.min(anchor,idx),Math.max(anchor,idx),idx<anchor?'backward':'forward');
+  else ta.setSelectionRange(idx,idx);
+}
+ta.addEventListener('keydown',e=>{
+  e.stopPropagation();
+  if(e.key==='Escape'){e.preventDefault();endEdit();return}
+  if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();moveVert(e.key==='ArrowUp'?-1:1,e.shiftKey)}
+  caretOn=true;requestDraw();
+});
+ta.addEventListener('input',()=>{if(!edit)return;texts.set(edit.k,ta.value);caretOn=true;save();requestDraw()});
+document.addEventListener('selectionchange',()=>{if(edit){caretOn=true;requestDraw()}});
+ta.addEventListener('blur',()=>setTimeout(()=>{if(edit&&document.activeElement!==ta)endEdit()},0));
+setInterval(()=>{if(edit){caretOn=!caretOn;requestDraw()}},530);
+
+/* ---------- tekenen ---------- */
+function contrast(hex){
+  if(!hex||hex[0]!=='#'||hex.length<7)return INK;
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return(.299*r+.587*g+.114*b)>150?'#111827':'#ffffff';
+}
+function render(c,W,H,v,ui){
+  const s=v.s,X=x=>Math.round((x-v.x)*s),Y=y=>Math.round((y-v.y)*s);
+  const gx0=Math.floor(v.x),gy0=Math.floor(v.y),gx1=Math.ceil(v.x+W/s),gy1=Math.ceil(v.y+H/s);
+  const fillCell=(x,y)=>{const a=X(x),b=Y(y);c.fillRect(a,b,X(x+1)-a,Y(y+1)-b)};
+  c.fillStyle=PAPER;c.fillRect(0,0,W,H);
+  // vakjes
+  if((gx1-gx0)*(gy1-gy0)<cells.size){
+    for(let y=gy0;y<gy1;y++)for(let x=gx0;x<gx1;x++){const col=cells.get(key(x,y));if(col){c.fillStyle=col;fillCell(x,y)}}
+  }else for(const[k,col]of cells){const[x,y]=pk(k);if(x<gx0||x>=gx1||y<gy0||y>=gy1)continue;c.fillStyle=col;fillCell(x,y)}
+  // voorbeeld van lijn/rechthoek
+  if(ui&&preview){c.globalAlpha=.6;c.fillStyle=color;for(const k of preview){const[x,y]=pk(k);if(x>=gx0&&x<gx1&&y>=gy0&&y<gy1)fillCell(x,y)}c.globalAlpha=1}
+  // raster
+  c.lineWidth=1;
+  if(s>=6){
+    c.strokeStyle=`rgba(70,125,200,${Math.min(.3,.1+(s-6)/40)})`;c.beginPath();
+    for(let x=gx0;x<=gx1;x++){if(x%10===0)continue;const p=X(x)+.5;c.moveTo(p,0);c.lineTo(p,H)}
+    for(let y=gy0;y<=gy1;y++){if(y%10===0)continue;const p=Y(y)+.5;c.moveTo(0,p);c.lineTo(W,p)}
+    c.stroke();
+  }
+  c.strokeStyle='rgba(70,125,200,.45)';c.beginPath();
+  for(let x=Math.ceil(gx0/10)*10;x<=gx1;x+=10){const p=X(x)+.5;c.moveTo(p,0);c.lineTo(p,H)}
+  for(let y=Math.ceil(gy0/10)*10;y<=gy1;y+=10){const p=Y(y)+.5;c.moveTo(0,p);c.lineTo(W,p)}
+  c.stroke();
+  // tekst
+  const fs=FR*s;let editData=null;
+  if(fs>=4){
+    c.font=`${fs}px ${FONT}`;c.textBaseline='middle';
+    for(const[k,t]of texts){
+      const isE=ui&&edit&&edit.k===k;if(!t&&!isE)continue;
+      const[x,y]=pk(k),r=regionOf(x,y),b=r.bbox;
+      if(b.x1<v.x||b.x0>v.x+W/s||b.y1<v.y||b.y0>v.y+H/s)continue;
+      const L=getLayout(k,t,r),tc=r.colored?contrast(r.color):INK;
+      if(isE){
+        editData={t,r,L,tc};
+        const ss=ta.selectionStart,se=ta.selectionEnd;
+        if(se>ss){c.fillStyle='rgba(37,99,235,.32)';
+          for(const ln of L.lines){const a=Math.max(ss,ln.start),z=Math.min(se,ln.end);
+            const nl=se>ln.end&&ss<=ln.end&&ln!==L.lines[L.lines.length-1]?.3:0;
+            if(z>a||nl){const xa=ln.run.x+PAD+widthOf(t,ln.start,a),xb=ln.run.x+PAD+widthOf(t,ln.start,Math.max(a,z))+nl;
+              c.fillRect((xa-v.x)*s,(ln.run.y+.12-v.y)*s,(xb-xa)*s,.76*s)}}}
+      }
+      c.fillStyle=tc;
+      for(const ln of L.lines){
+        let xx=ln.run.x+PAD;const sy=(ln.run.y+.53-v.y)*s;
+        for(let i=ln.start;i<ln.end;){const g=gl(t,i);if(g!==' ')c.fillText(g,(xx-v.x)*s,sy);xx+=cw(g);i+=g.length}
+      }
+      if(L.overflow&&L.lines.length){
+        const run=L.lines[L.lines.length-1].run,ex=X(run.x+run.len),ey=Y(run.y+1),m=Math.max(4,s*.28);
+        c.beginPath();c.moveTo(ex-1,ey-1);c.lineTo(ex-1-m,ey-1);c.lineTo(ex-1,ey-1-m);c.closePath();c.fill();
+      }
+    }
+  }
+  if(!ui)return;
+  // bewerkt gebied + cursor
+  if(edit){
+    if(!editData){const e=editInfo();editData={...e,tc:e.r.colored?contrast(e.r.color):INK}}
+    const{t,r,L,tc}=editData;
+    c.strokeStyle=ACC;c.lineWidth=2;c.beginPath();
+    for(const[x,y]of r.list){
+      if(!r.set.has(key(x,y-1))){c.moveTo(X(x),Y(y));c.lineTo(X(x+1),Y(y))}
+      if(!r.set.has(key(x,y+1))){c.moveTo(X(x),Y(y+1));c.lineTo(X(x+1),Y(y+1))}
+      if(!r.set.has(key(x-1,y))){c.moveTo(X(x),Y(y));c.lineTo(X(x),Y(y+1))}
+      if(!r.set.has(key(x+1,y))){c.moveTo(X(x+1),Y(y));c.lineTo(X(x+1),Y(y+1))}
+    }
+    c.stroke();
+    const focus=ta.selectionDirection==='backward'?ta.selectionStart:ta.selectionEnd;
+    const p=caretPos(t,L,focus);
+    if(p){
+      const sx=(p.x-v.x)*s,sy=(p.y-v.y)*s;
+      ta.style.transform=`translate(${Math.round(sx)}px,${Math.round(sy)}px)`;
+      if(caretOn&&ta.selectionStart===ta.selectionEnd){c.fillStyle=tc;c.fillRect(sx-.75,sy+s*.16,Math.max(1.5,s/18),s*.68)}
+    }
+  }
+  // penseel onder de muis
+  if(hover&&!gest&&!edit&&tool!=='pan'){
+    const[hx,hy]=hover;let fp;
+    if(tool==='pen')fp=shape==='spray'?footprint(hx,hy,'round',sprayN()):footprint(hx,hy,shape,size);
+    else if(tool==='erase'||tool==='line'||tool==='rect')fp=footprint(hx,hy,shape==='spray'?'round':shape,size);
+    else fp=[[hx,hy]];
+    const set=new Set(fp.map(([x,y])=>key(x,y)));
+    c.strokeStyle='rgba(15,23,42,.55)';c.lineWidth=1.5;c.beginPath();
+    for(const[x,y]of fp){
+      if(!set.has(key(x,y-1))){c.moveTo(X(x),Y(y));c.lineTo(X(x+1),Y(y))}
+      if(!set.has(key(x,y+1))){c.moveTo(X(x),Y(y+1));c.lineTo(X(x+1),Y(y+1))}
+      if(!set.has(key(x-1,y))){c.moveTo(X(x),Y(y));c.lineTo(X(x),Y(y+1))}
+      if(!set.has(key(x+1,y))){c.moveTo(X(x+1),Y(y));c.lineTo(X(x+1),Y(y+1))}
+    }
+    c.stroke();
+  }
+}
+let raf=0;
+function requestDraw(){if(!raf)raf=requestAnimationFrame(()=>{raf=0;ctx.setTransform(dpr,0,0,dpr,0,0);render(ctx,W,H,view,true)})}
+function resize(){dpr=window.devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';requestDraw()}
+addEventListener('resize',resize);
+
+/* ---------- aanwijzer: tekenen, schuiven, zoomen ---------- */
+const ptrs=new Map();let gest=null,spaceDown=false,hover=null,preview=null;
+const toWorld=(sx,sy)=>({x:view.x+sx/view.s,y:view.y+sy/view.s});
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+function zoomAt(sx,sy,f){const w=toWorld(sx,sy);view.s=clamp(view.s*f,4,140);view.x=w.x-sx/view.s;view.y=w.y-sy/view.s;changed()}
+function changed(){$('#zlabel').textContent=Math.round(view.s/BASE*100)+'%';save();requestDraw()}
+function setCursor(){
+  cv.style.cursor=(spaceDown||tool==='pan')?(gest&&gest.type==='pan'?'grabbing':'grab'):tool==='text'?'text':'crosshair';
+}
+function abortGesture(){
+  if(!gest)return;
+  if(gest.type==='paint'){clearInterval(gest.timer);rollback()}
+  preview=null;gest=null;
+}
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('mousedown',e=>e.preventDefault());
+cv.addEventListener('pointerdown',e=>{
+  closeMenu();
+  try{cv.setPointerCapture(e.pointerId)}catch(_){}
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===2){abortGesture();const[a,b]=[...ptrs.values()];gest={type:'pinch',d0:dist(a,b)||1,c0:mid(a,b),v0:{...view}};requestDraw();return}
+  if(ptrs.size>2)return;
+  if(e.button===1||e.button===2||tool==='pan'||spaceDown){gest={type:'pan',lx:e.clientX,ly:e.clientY};setCursor();return}
+  if(e.button!==0)return;
+  const w=toWorld(e.clientX,e.clientY),cx=Math.floor(w.x),cy=Math.floor(w.y);
+  if(tool==='pen'||tool==='erase'){
+    const erase=tool==='erase',spray=!erase&&shape==='spray';
+    begin();stamp(cx,cy,erase);
+    gest={type:'paint',last:[cx,cy],erase,spray};
+    if(spray)gest.timer=setInterval(()=>{stamp(gest.last[0],gest.last[1],false);requestDraw()},70);
+  }else if(tool==='line'||tool==='rect'||tool==='rectFill'){
+    gest={type:'shape',a:[cx,cy]};preview=shapeCells([cx,cy],[cx,cy]);
+  }else if(tool==='fill'){flood(cx,cy)}
+  else if(tool==='pick'){
+    const c=cells.get(key(cx,cy));
+    if(c){setColor(c);setTool(['erase','pan','text','pick'].includes(prevTool)?'pen':prevTool)}
+    else toast('Dit vakje heeft geen kleur.');
+  }else if(tool==='text'){
+    if(edit&&regionOf(...pk(edit.k)).set.has(key(cx,cy))){
+      const{t,L}=editInfo(),idx=hitIndex(t,L,w.x,w.y);
+      ta.focus({preventScroll:true});ta.setSelectionRange(idx,idx);caretOn=true;
+      gest={type:'text',a:idx};
+    }else{startEdit(cx,cy,w);gest={type:'text',a:ta.selectionStart}}
+  }
+  requestDraw();
+});
+cv.addEventListener('pointermove',e=>{
+  if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const w=toWorld(e.clientX,e.clientY),cx=Math.floor(w.x),cy=Math.floor(w.y);
+  if(e.pointerType==='mouse'){if(!hover||hover[0]!==cx||hover[1]!==cy){hover=[cx,cy];requestDraw()}}
+  if(!gest)return;
+  if(gest.type==='pinch'){
+    if(ptrs.size<2)return;const[a,b]=[...ptrs.values()],m=mid(a,b),v0=gest.v0;
+    const ns=clamp(v0.s*dist(a,b)/gest.d0,4,140),wx=v0.x+gest.c0.x/v0.s,wy=v0.y+gest.c0.y/v0.s;
+    view.s=ns;view.x=wx-m.x/ns;view.y=wy-m.y/ns;changed();return;
+  }
+  if(gest.type==='pan'){view.x-=(e.clientX-gest.lx)/view.s;view.y-=(e.clientY-gest.ly)/view.s;gest.lx=e.clientX;gest.ly=e.clientY;changed();return}
+  if(gest.type==='paint'){
+    const[lx,ly]=gest.last;
+    if(cx!==lx||cy!==ly){
+      if(gest.spray)stamp(cx,cy,false);
+      else for(const[x,y]of lineCells(lx,ly,cx,cy).slice(1))stamp(x,y,gest.erase);
+      gest.last=[cx,cy];requestDraw();
+    }
+  }else if(gest.type==='shape'){preview=shapeCells(gest.a,[cx,cy]);requestDraw()}
+  else if(gest.type==='text'&&edit){
+    const{t,L}=editInfo(),idx=hitIndex(t,L,w.x,w.y),a=gest.a;
+    ta.setSelectionRange(Math.min(a,idx),Math.max(a,idx),idx<a?'backward':'forward');requestDraw();
+  }
+});
+function onUp(e){
+  ptrs.delete(e.pointerId);
+  if(!gest)return;
+  if(gest.type==='pinch'){if(ptrs.size<2)gest=null;return}
+  if(gest.type==='paint'){clearInterval(gest.timer);commit()}
+  else if(gest.type==='shape'){if(e.type!=='pointercancel'){begin();for(const k of preview)setCell(k,color);commit()}preview=null}
+  else if(gest.type==='text'){ta.focus({preventScroll:true})}
+  gest=null;setCursor();requestDraw();
+}
+cv.addEventListener('pointerup',onUp);cv.addEventListener('pointercancel',onUp);
+cv.addEventListener('pointerleave',()=>{hover=null;requestDraw()});
+cv.addEventListener('wheel',e=>{
+  e.preventDefault();
+  if(e.ctrlKey||e.metaKey)zoomAt(e.clientX,e.clientY,Math.exp(-e.deltaY*.01));
+  else{let dx=e.deltaX,dy=e.deltaY;if(e.deltaMode===1){dx*=18;dy*=18}if(e.shiftKey&&!dx){dx=dy;dy=0}view.x+=dx/view.s;view.y+=dy/view.s;changed()}
+},{passive:false});
+
+/* ---------- toetsenbord ---------- */
+addEventListener('keydown',e=>{
+  if(e.target===ta||e.target.tagName==='INPUT')return;
+  const mod=e.ctrlKey||e.metaKey,k=e.key.toLowerCase();
+  if(mod&&k==='z'){e.preventDefault();e.shiftKey?redo():undo();return}
+  if(mod&&k==='y'){e.preventDefault();redo();return}
+  if(mod||e.altKey)return;
+  if(e.code==='Space'){e.preventDefault();if(!spaceDown){spaceDown=true;setCursor()}return}
+  if(e.key==='Escape'){closeMenu();$('#help').classList.remove('open');return}
+  const map={b:'pen',p:'pen',l:'line',f:'fill',g:'fill',e:'erase',t:'text',h:'pan',i:'pick'};
+  if(k==='r'){setTool(e.shiftKey?'rectFill':'rect');return}
+  if(map[k]){setTool(map[k]);return}
+  if(e.key==='['||e.key===']'){const S=[1,2,3,5,9];setSize(S[clamp(S.indexOf(size)+(e.key===']'?1:-1),0,S.length-1)]);return}
+  if(e.key==='+'||e.key==='='){zoomAt(W/2,H/2,1.25);return}
+  if(e.key==='-'||e.key==='_'){zoomAt(W/2,H/2,.8);return}
+  if(e.key==='0'){zoomAt(W/2,H/2,BASE/view.s);return}
+  if(/^[1-9]$/.test(e.key)){setColor(PALETTE[+e.key-1]);return}
+});
+addEventListener('keyup',e=>{if(e.code==='Space'){spaceDown=false;setCursor()}});
+addEventListener('blur',()=>{spaceDown=false;setCursor()});
+
+/* ---------- interface ---------- */
+const ICONS={
+  pan:'<path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.3l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>',
+  pen:'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>',
+  line:'<path d="M5 19 19 5"/><circle cx="5" cy="19" r="1.5" fill="currentColor"/><circle cx="19" cy="5" r="1.5" fill="currentColor"/>',
+  rect:'<rect x="4" y="5" width="16" height="14" rx="1.5"/>',
+  rectFill:'<rect x="4" y="5" width="16" height="14" rx="1.5" fill="currentColor"/>',
+  fill:'<path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z"/><path d="m5 2 5 5"/><path d="M2 13h15"/><path d="M22 20a2 2 0 1 1-4 0c0-1.6 1.7-2.4 2-4 .3 1.6 2 2.4 2 4Z"/>',
+  erase:'<path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/>',
+  text:'<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>',
+  pick:'<path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"/>',
+  undo:'<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>',
+  redo:'<path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 15-6.7l3 2.7"/>',
+  menu:'<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>',
+  home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v11h14V9"/>',
+  square:'<rect x="6" y="6" width="12" height="12" fill="currentColor" stroke="none"/>',
+  round:'<circle cx="12" cy="12" r="6.5" fill="currentColor" stroke="none"/>',
+  spray:'<g fill="currentColor" stroke="none"><circle cx="7" cy="8" r="1.4"/><circle cx="13" cy="6" r="1.4"/><circle cx="17" cy="11" r="1.4"/><circle cx="10" cy="12" r="1.4"/><circle cx="6" cy="16" r="1.4"/><circle cx="14" cy="16" r="1.4"/><circle cx="18" cy="18" r="1.2"/><circle cx="10" cy="19" r="1.2"/></g>'
+};
+const icon=n=>`<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
+const TOOLS=[['pan','Verschuiven (H)'],['pen','Potlood (B)'],['line','Lijn (L)'],['rect','Rechthoek (R)'],['rectFill','Gevulde rechthoek (Shift+R)'],['fill','Emmer (F)'],['erase','Gum (E)'],['text','Tekst (T)'],['pick','Pipet (I)']];
+$('#tools').innerHTML=TOOLS.map(([id,l])=>`<button class="btn" data-tool="${id}" title="${l}" aria-label="${l}">${icon(id)}</button>`).join('')+
+  `<span class="sep"></span><button class="btn" id="undo" title="Ongedaan maken (Ctrl+Z)" aria-label="Ongedaan maken">${icon('undo')}</button><button class="btn" id="redo" title="Opnieuw (Ctrl+Shift+Z)" aria-label="Opnieuw">${icon('redo')}</button>`;
+$('#tools').addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool)});
+$('#undo').onclick=undo;$('#redo').onclick=redo;
+const SIZES=[1,2,3,5,9];
+$('#bottom').innerHTML=PALETTE.map((c,i)=>`<button class="sw" data-color="${c}" style="background:${c}" title="${i<9?'Kleur '+(i+1):'Kleur'}" aria-label="Kleur ${c}"></button>`).join('')+
+  `<label class="sw" id="custom" title="Eigen kleur"><input type="color" id="cpick" value="#3b82f6" aria-label="Eigen kleur"></label><span class="sep"></span>`+
+  [['square','Vierkant penseel'],['round','Rond penseel'],['spray','Spray']].map(([id,l])=>`<button class="btn" data-shape="${id}" title="${l}" aria-label="${l}">${icon(id)}</button>`).join('')+
+  `<span class="sep"></span>`+SIZES.map(n=>`<button class="btn" data-size="${n}" title="Dikte ${n}" aria-label="Dikte ${n}"><span class="dot" style="width:${3+n*1.6}px;height:${3+n*1.6}px;border-radius:2px"></span></button>`).join('');
+$('#bottom').addEventListener('click',e=>{
+  const c=e.target.closest('[data-color]'),s=e.target.closest('[data-shape]'),z=e.target.closest('[data-size]');
+  if(c)setColor(c.dataset.color);if(s)setShape(s.dataset.shape);if(z)setSize(+z.dataset.size);
+});
+$('#cpick').addEventListener('input',e=>setColor(e.target.value));
+$('#menuBtn').innerHTML=icon('menu');$('#home').innerHTML=icon('home');
+function setTool(t){
+  if(t!==tool){endEdit();prevTool=tool;tool=t}
+  document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool===tool));
+  setCursor();requestDraw();
+}
+function setColor(c){
+  color=c;let found=false;
+  document.querySelectorAll('[data-color]').forEach(b=>{const on=b.dataset.color.toLowerCase()===c.toLowerCase();b.classList.toggle('on',on);if(on)found=true});
+  $('#custom').classList.toggle('on',!found);if(!found)$('#custom').style.background=c;else $('#custom').style.background='';
+  try{$('#cpick').value=c}catch(_){}
+  if(['erase','pan','pick','text'].includes(tool))setTool('pen');
+  requestDraw();
+}
+function setShape(s){shape=s;document.querySelectorAll('[data-shape]').forEach(b=>b.classList.toggle('on',b.dataset.shape===s));if(tool!=='erase'&&tool!=='pen'&&tool!=='line'&&tool!=='rect')setTool('pen');requestDraw()}
+function setSize(n){size=n;document.querySelectorAll('[data-size]').forEach(b=>b.classList.toggle('on',+b.dataset.size===n));requestDraw()}
+$('#zin').onclick=()=>zoomAt(W/2,H/2,1.25);$('#zout').onclick=()=>zoomAt(W/2,H/2,.8);
+$('#zlabel').onclick=()=>zoomAt(W/2,H/2,BASE/view.s);
+$('#home').onclick=()=>{view.x=-W/2/view.s;view.y=-H/2/view.s;changed()};
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600)}
+function closeMenu(){$('#menu').classList.remove('open')}
+$('#menuBtn').onclick=e=>{e.stopPropagation();$('#menu').classList.toggle('open')};
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#menu,#menuBtn'))closeMenu()});
+$('#help').addEventListener('click',e=>{if(e.target.id==='help'||e.target.classList.contains('close'))$('#help').classList.remove('open')});
+$('#menu').addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;closeMenu();endEdit();
+  const a=b.dataset.act;
+  if(a==='png')exportPNG();
+  else if(a==='save')download(new Blob([JSON.stringify(data(),null,0)],{type:'application/json'}),'ruitjes.json');
+  else if(a==='open')$('#file').click();
+  else if(a==='help')$('#help').classList.add('open');
+  else if(a==='clear'){
+    if(!cells.size&&!texts.size)return;
+    if(!confirm('Alles wissen? (Je kunt dit nog ongedaan maken.)'))return;
+    begin();for(const k of[...cells.keys()])setCell(k,null);for(const k of[...texts.keys()])setText(k,null);tx.displaced.clear();commit();requestDraw();
+  }
+});
+$('#file').addEventListener('change',async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());if(!d||!Array.isArray(d.cells))throw 0;loadData(d);undoStack.length=redoStack.length=0;updUndo();save();changed();toast('Bestand geopend.')}
+  catch(_){toast('Dit bestand kon niet worden geopend.')}
+});
+
+/* ---------- opslaan / laden / exporteren ---------- */
+function data(){return{v:1,cells:[...cells],texts:[...texts].filter(([,t])=>t&&t.trim()),view:{x:view.x,y:view.y,s:view.s}}}
+let saveT;function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(LS,JSON.stringify(data()))}catch(_){}},350)}
+function loadData(d){
+  cells.clear();texts.clear();
+  for(const[k,v]of d.cells||[])if(typeof k==='string'&&typeof v==='string')cells.set(k,v);
+  for(const[k,v]of d.texts||[])if(typeof k==='string'&&typeof v==='string')texts.set(k,v);
+  if(d.view&&isFinite(d.view.x)&&isFinite(d.view.y)&&isFinite(d.view.s)){view.x=d.view.x;view.y=d.view.y;view.s=clamp(d.view.s,4,140)}
+  version++;
+}
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+function exportPNG(){
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  const inc=(a,b,c,d)=>{if(a<x0)x0=a;if(b<y0)y0=b;if(c>x1)x1=c;if(d>y1)y1=d};
+  for(const k of cells.keys()){const[x,y]=pk(k);inc(x,y,x+1,y+1)}
+  for(const[k,t]of texts){if(!t)continue;const[x,y]=pk(k),r=regionOf(x,y),L=getLayout(k,t,r);
+    if(r.colored)inc(r.bbox.x0,r.bbox.y0,r.bbox.x1,r.bbox.y1);
+    else{const ln=L.lines[0];const w=ln?Math.ceil(PAD*2+widthOf(t,ln.start,ln.end)):1;inc(x,y,x+Math.max(1,w),y+1)}}
+  if(x0===Infinity){toast('Het vel is nog leeg.');return}
+  x0-=1;y0-=1;x1+=1;y1+=1;
+  const bw=x1-x0,bh=y1-y0,s=Math.max(4,Math.min(32,Math.floor(8000/Math.max(bw,bh))));
+  const c=document.createElement('canvas');c.width=bw*s;c.height=bh*s;
+  render(c.getContext('2d'),c.width,c.height,{x:x0,y:y0,s},false);
+  c.toBlob(b=>b?download(b,'ruitjes.png'):toast('Exporteren mislukt.'),'image/png');
+}
+
+/* ---------- start ---------- */
+resize();
+let loaded=false;
+try{const d=JSON.parse(localStorage.getItem(LS)||'null');if(d&&Array.isArray(d.cells)){loadData(d);loaded=true}}catch(_){}
+if(!loaded){view.x=-Math.round(W/2/view.s);view.y=-Math.round(H/2/view.s)}
+setTool('pen');setColor(color);setShape('square');setSize(1);updUndo();changed();
+if(!loaded)setTimeout(()=>toast('Tip: kies Tekst (T) en typ in gekleurde vakjes — aaneengesloten vakjes worden één tekstvak.'),400);
+})();
+</script>
+</body>
+</html>
 
